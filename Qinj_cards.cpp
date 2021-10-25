@@ -26,7 +26,7 @@ int Qinj_cards()
     TCanvas* c1         = new TCanvas("c1");
     Int_t FEB_idc, FEB_ID=0, cat_idc, cat_ID, data_uidc, data_UID, CH;
     Double_t b, a0, a00, a00_err, a00_mean, a00_sig, a1, a1_err, a1_mean, a1_sig, a2, a2_err, a2_mean, a2_sig, a3, a3_err, a3_mean, a3_sig, a4, a4_err, a4_mean, a4_sig, a5, a5_err, a5_mean, a5_sig, ChiSq, ChiSq_mean, ChiSq_sig;
-    TString filename = "DB_lin_fit_pars.root", tree_name = "TB_lin_par";
+    TString filename = "/home/pdeshans/Documents/PhD_files/from_M2_cpy/Qinj_fitdata/test_b2.root", tree_name = "TB_lin_par";
     TFile *myfile       = new TFile(filename, "READ"); //input TFile
     TTree *TB_pars      = (TTree*)myfile->Get(tree_name); //input TTree
     TB_pars->SetBranchAddress("FEB_ID",       &FEB_ID);
@@ -46,7 +46,7 @@ int Qinj_cards()
     TB_pars->SetBranchAddress("b",            &b);
     TB_pars->SetBranchAddress("ChiSq",        &ChiSq); //j=6
     
-    TFile *outfile      = new TFile("TB_cards_analysis.root", "RECREATE"); //output TFile with histos + TTree
+    TFile *outfile      = new TFile("TB_cards_b2.root", "RECREATE"); //output TFile with histos + TTree
     TTree *TB_cards     = new TTree("TB_cards","TestBenchDB Qinj data card by card analysis"); //output TTree
     
     TB_cards->Branch("FEB_idc",      &FEB_idc,   "FEB_idc/I"); 

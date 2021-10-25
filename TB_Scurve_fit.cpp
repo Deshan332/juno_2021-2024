@@ -24,7 +24,7 @@ using namespace std;
 int TB_Scurve_fit()
 {
     TCanvas* c1         = new TCanvas("c1");
-    Int_t FEB_id=600, FEB_ID, cat_id, test_id, test_ID, cat_ID, data_uid, data_UID, ch, CH, ch_inj, FEB_count=0, ch_INJ, sid, SID, DAC, counts, counts_max=0, cats = 7,  entrycount=0, temp=0, s_temp=0, i=0, fcount = 0, n=0, f_id=1, status, v_size=0;
+    Int_t p=0, FEB_id=600, FEB_ID, FEB_tmp = 0, cat_id, test_id, test_ID, cat_ID, data_uid, data_UID, ch, CH, ch_tmp=0, ch_inj, FEB_count=0, ch_INJ, sid, SID, DAC, counts, counts_max=0, cats = 7,  entrycount=0, temp=0, s_temp=0, i=0, fcount = 0, n=0, f_id=1, status, v_size=0;
     Double_t thresh, THRESH, ChiSq, UL, LL, N_0, N_0_err, mu, mu_err, sigma, sig_err;
     TString filename = "Scurve_tree.root", tree_name = "TB_Scurve";
     TFile *myfile           = new TFile(filename, "READ"); //input TFile
@@ -44,7 +44,7 @@ int TB_Scurve_fit()
     LL = TB_Scurve->GetMinimum("DAC");
     TFile *outfile[30]; 
     TFile *treefile     = new TFile("TB_Scurve_NOPE_pars_2.root", "RECREATE"); 
-    TTree *TB_pars      = new TTree("TB_Scurve_par","TestBenchDB Scurve ThirdPE fit parameters");
+    TTree *TB_pars      = new TTree("TB_Scurve_par","TestBenchDB Scurve NOPE fit parameters");
     
     TB_pars->Branch("FEB_ID",       &FEB_ID,    "FEB_ID/I");
     TB_pars->Branch("cat_ID",       &cat_ID,    "cat_ID/I");
@@ -72,30 +72,22 @@ int TB_Scurve_fit()
     
     for(int i=0; i<TB_Scurve->GetEntries(); ++i)
     {
-        if(f_id==1) //f_id is the TFile creation index. f_id =1 ---> call to Create a new TFile
-        {
-            TString file_tag    = TString("TB_Scurve_NOPE_") + TString(Form("%d",FEB_id)) + TString(".root");
-            outfile[n]          = new TFile(file_tag, "RECREATE"); //n is the index of TFile count.
-            f_id = 0;
-            cout<<"New TFile created. (n = "<<n<<")"<<endl;
-        }
         TB_Scurve->GetEntry(i);
-        FEB_ID = FEB_id;    cat_ID = cat_id;    data_UID = data_uid;    test_ID = test_id;  CH = ch;    SID=sid;    THRESH = thresh;    ch_INJ = ch_inj;           
-
+        FEB_ID = FEB_id;    cat_ID = cat_id;    data_UID = data_uid;    test_ID = test_id;  CH = ch;    SID=sid;    THRESH = thresh;    ch_INJ = ch_inj;                
         if((cat_id==1)&&(ch_inj==-1)&&(FEB_id>600))
         {
-            ++entrycount;
+            if(p==0){s_temp=sid; FEB_tmp = FEB_id; p=10;}
             if(FEB_id!=temp)    
             {
                 ++FEB_count;  //FEB_count keeps the count of concerned FEB type only (per batch)
                 temp = FEB_id;
                 cout<<"FEB_id = "<<FEB_id<<endl;
             } 
-            
-            if(entrycount==202)    //before switching to a new scurve, do the fit for the current one 
+
+            if((sid!=s_temp)&&(entrycount==1))    //before switching to a new scurve, do the fit for the current one 
             {
                 v_size = hit_counts.size();
-                labels[2] = TString("Graph of no. of TRT counts vs. DAC threshold for FEB no. ") + TString(Form("%d",FEB_id)) + TString(", channel ") + TString(Form("%d",ch)) + TString(" (Injecting 0PE, Category: ") + cat_label[cat_id-1] + TString(")");
+                labels[2] = TString("Graph of no. of TRT counts vs. DAC threshold for FEB no. ") + TString(Form("%d",FEB_tmp)) + TString(", channel ") + TString(Form("%d",ch_tmp)) + TString(" (Injecting 0PE, Category: ") + cat_label[cat_id-1] + TString(")");
                     
                 for(int m=0; m<v_size; ++m) 
                 {
@@ -107,7 +99,7 @@ int TB_Scurve_fit()
                 Double_t par_limits[6]  = {0.95*par[0], 1.05*par[0], LL, UL, 0., 10.}; //parameter bounds
                 mygraph = TGrErr_getter(gdata, ddata, idata, labels);
 
-                mygraph->SetName(TString("FEB") + TString(Form("%d", FEB_id)) + TString("ch") + TString(Form("%d",ch)));
+                mygraph->SetName(TString("FEB") + TString(Form("%d", FEB_tmp)) + TString("ch") + TString(Form("%d",ch_tmp)));
                 mygraph->Draw("AP");
                     
                 TF1 *Q_fit = new TF1 ("Q_fit", Q_function, LL, UL,3);                       //fit method
@@ -145,10 +137,11 @@ int TB_Scurve_fit()
                 TB_pars->Fill();
                 outfile[n]->cd();
                 mygraph->Write();
-                entrycount=1;
-                s_temp=sid; counts_max = counts;
+                counts_max = counts;
+                s_temp=sid;
             }
-            
+            FEB_tmp = FEB_id;   ch_tmp = ch;   
+            s_temp=sid; entrycount=1;
             hit_counts.push_back(counts); //y 
             hit_counts_err.push_back(0); //y_err 
             sc_DAC.push_back(DAC); //x in DAC
@@ -165,7 +158,75 @@ int TB_Scurve_fit()
             ++n;  
             FEB_count=0;  
         }
+        if(f_id==1) //f_id is the TFile creation index. f_id =1 ---> call to Create a new TFile
+        {
+            TString file_tag    = TString("TB_Scurve_NOPE_") + TString(Form("%d",FEB_id)) + TString(".root");
+            outfile[n]          = new TFile(file_tag, "RECREATE"); //n is the index of TFile count.
+            f_id = 0;
+            cout<<"New TFile created. (n = "<<n<<")"<<endl;
+        }
+
     }
+
+    //to get the last fit
+
+
+    v_size = hit_counts.size();
+    labels[2] = TString("Graph of no. of TRT counts vs. DAC threshold for FEB no. ") + TString(Form("%d",FEB_tmp)) + TString(", channel ") + TString(Form("%d",ch_tmp)) + TString(" (Injecting 0PE, Category: ") + cat_label[cat_id-1] + TString(")");
+                    
+    for(int m=0; m<v_size; ++m) 
+    {
+        hit_counts[m] = hit_counts[m]/counts_max;    //normallize counts to unity
+    }
+
+    struct graph_data gdata1 = {sc_DAC, sc_DAC_err, hit_counts, hit_counts_err};         //the graph
+    Double_t par1[3]         = {1., 360., 1.};       //initial parametrization
+    Double_t par_limits1[6]  = {0.95*par1[0], 1.05*par1[0], LL, UL, 0., 10.}; //parameter bounds
+    mygraph = TGrErr_getter(gdata1, ddata, idata, labels);
+
+    mygraph->SetName(TString("FEB") + TString(Form("%d", FEB_tmp)) + TString("ch") + TString(Form("%d",ch_tmp)));
+    mygraph->Draw("AP");
+                    
+    TF1 *Q_fit1 = new TF1 ("Q_fit", Q_function, LL, UL,3);                       //fit method
+    TString parnames1[3] = {TString("N_{0}"), TString("#mu"), TString("#sigma_{0}")};
+
+    for(int k=0; k<3; ++k)
+    {
+        Q_fit1->SetParameter(k,par1[k]);
+        Q_fit1->SetParLimits(k,par_limits1[2*k],par_limits1[2*k+1]);
+        Q_fit1->SetParName(k,parnames1[k]);  
+    }
+        Q_fit1->SetNpx(30000);
+        for(int p=0; p<10; ++p)
+        {
+            Q_fit1->FixParameter(0, 1);
+            mygraph->Fit("Q_fit","RqE","",LL,UL);
+
+            for(int j=0; j<3; ++j)
+            {
+                par1[j] = Q_fit1->GetParameter(j);
+                Q_fit1->SetParameter(j,par1[j]);
+            }
+            if( (gMinuit->fCstatu.Contains("CONVERGED"))  && (Q_fit1->GetChisquare()/Q_fit1->GetNDF() < 5) )  {status =1;    Q_fit1->SetLineColor(2);   break;}
+            else    {status =0;    Q_fit1->SetLineColor(1);}
+        }
+        gStyle->SetOptStat(111);
+        gStyle->SetOptFit(111);
+        Q_fit1->Draw("SAME");
+        if(ch>62) cout<<"fitted FEB "<<FEB_tmp<<" channel "<<ch_tmp<<endl; 
+        N_0     = Q_fit1->GetParameter(0);       mu      = Q_fit1->GetParameter(1);   sigma   = Q_fit1->GetParameter(2);
+        N_0_err = Q_fit1->GetParError(0);        mu_err  = Q_fit1->GetParError(1);    sig_err = Q_fit1->GetParError(2);
+        ChiSq   = Q_fit1->GetChisquare()/Q_fit1->GetNDF();
+        hit_counts.clear();    
+        sc_DAC.clear();    
+        treefile->cd();
+        TB_pars->Fill();
+        outfile[n]->cd();
+        mygraph->Write();
+        counts_max = counts;
+        s_temp=sid;
+
+
     outfile[n]->Close();
     delete outfile[n];
     cout<<"TFile closed."<<endl;
