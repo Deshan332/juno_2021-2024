@@ -15,15 +15,15 @@ int Merge2trees()
 {
     TList *list     = new TList();
     
-    TFile *infile1  = new TFile("TB_Scurve_NOPE_pars.root", "READ");
+    TFile *infile1  = new TFile("TB_Scurve_ThirdPE_pars.root", "READ");
     TTree *tree1    = (TTree*)infile1->Get("TB_Scurve_par");
     list->Add(tree1);
     
-    TFile *infile2  = new TFile("TB_Scurve_NOPE_pars_2.root", "READ");  
+    TFile *infile2  = new TFile("TB_Scurve_ThirdPE_pars_2.root", "READ");  
     TTree *tree2    = (TTree*)infile2->Get("TB_Scurve_par");
     list->Add(tree2);
 
-    TFile *outfile  = new TFile("Scurve_NOPE_sum.root","recreate");
+    TFile *outfile  = new TFile("Scurve_ThirdPE_sum.root","recreate");
     TTree *newtree = TTree::MergeTrees(list);
 
     newtree->Write();
