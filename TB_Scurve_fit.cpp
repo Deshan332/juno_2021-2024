@@ -45,7 +45,7 @@ int TB_Scurve_fit()
     UL = TB_Scurve->GetMaximum("DAC");
     LL = TB_Scurve->GetMinimum("DAC");
     TFile *outfile[30]; 
-    TFile *treefile     = new TFile("TB_Scurve_NOPE_pars_2.root", "RECREATE"); 
+    TFile *treefile     = new TFile("TB_Scurve_ThirdPE_pars_2.root", "RECREATE"); 
     TTree *TB_pars      = new TTree("TB_Scurve_par","TestBenchDB Scurve NOPE fit parameters");
     
     TB_pars->Branch("FEB_ID",       &FEB_ID,    "FEB_ID/I");
@@ -75,7 +75,7 @@ int TB_Scurve_fit()
     for(int i=0; i<TB_Scurve->GetEntries(); ++i)
     {
         TB_Scurve->GetEntry(i);
-        if((cat_id==1)&&(ch_inj==-1)&&(FEB_id<103))
+        if((cat_id==1)&&(ch_inj>-1)&&(FEB_id>600))
         {
             FEB_tmp = FEB_ID;   cat_tmp = cat_ID;   data_tmp = data_UID;    test_tmp = test_ID; CH_tmp = CH;    SID_tmp = SID;  THRESH_tmp = THRESH;    ch_INJ_tmp = ch_INJ;  //this set holds the data from previous read                           
             if(p==0){s_temp=sid; FEB_tmp = FEB_id; p=10;}
@@ -168,7 +168,7 @@ int TB_Scurve_fit()
         }
         if(f_id==1) //f_id is the TFile creation index. f_id =1 ---> call to Create a new TFile
         {
-            TString file_tag    = TString("TB_Scurve_NOPE") + TString(Form("%d",FEB_id)) + TString(".root");
+            TString file_tag    = TString("TB_Scurve_ThirdPE") + TString(Form("%d",FEB_id)) + TString(".root");
             outfile[n]          = new TFile(file_tag, "RECREATE"); //n is the index of TFile count.
             f_id = 0;
             cout<<"New TFile created. (n = "<<n<<")"<<endl;
