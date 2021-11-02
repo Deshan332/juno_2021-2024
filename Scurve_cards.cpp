@@ -25,7 +25,7 @@ int Scurve_cards()
 {
     Int_t FEB_idc, FEB_ID=0, cat_idc, cat_ID, test_ID, test_idc, data_uidc, data_UID, CH, status, SID, sidc;
     Double_t mu, mu_err, mu_mean, mu_sig, sigma, sig_err, sig_mean, sig_sig, THRESH, THRESH_mean, ChiSq, ChiSq_mean, ChiSq_sig;
-    TString filename = "/home/pdeshans/Documents/PhD_files/from_M2_cpy/Scurve_NOPE_sum.root", tree_name = "TB_Scurve_par";
+    TString filename = "/home/pdeshans/Documents/PhD_files/from_M2_cpy/Scurve_ThirdPE_sum.root", tree_name = "TB_Scurve_par";
     TFile *myfile       = new TFile(filename); //input TFile
     TTree *TB_pars      = (TTree*)myfile->Get(tree_name); //input TTree
 
@@ -43,8 +43,8 @@ int Scurve_cards()
     TB_pars->SetBranchAddress("THRESH",        &THRESH);
     TB_pars->SetBranchAddress("status",       &status); 
     
-    TFile *outfile      = new TFile("TB_cards_NOPE.root", "RECREATE"); //output TFile with histos + TTree
-    TTree *TB_cards     = new TTree("TB_cards","TestBenchDB Qinj data card by card analysis"); //output TTree
+    TFile *outfile      = new TFile("TB_cards_ThirdPE.root", "RECREATE"); //output TFile with histos + TTree
+    TTree *TB_cards     = new TTree("TB_cards","TestBenchDB ThirdPE data card by card analysis"); //output TTree
  
     TB_cards->Branch("FEB_idc",      &FEB_idc,   "FEB_idc/I"); 
     TB_cards->Branch("cat_idc",      &cat_idc,   "cat_idc/I"); 
