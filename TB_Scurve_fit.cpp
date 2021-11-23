@@ -25,8 +25,8 @@ int TB_Scurve_fit()
 {
     TCanvas* c1         = new TCanvas("c1");
     Int_t p=0, FEB_id=600, FEB_ID, FEB_tmp = 0, cat_id, test_id, test_ID, cat_ID, data_uid, data_UID, ch, CH, ch_tmp=0, ch_inj, FEB_count=0, 
-    ch_INJ, sid, SID, DAC, counts, counts_max=0, cats = 7,  entrycount=0, temp=0, s_temp=0, i=0, fcount = 0, n=0, f_id=1, status, v_size=0,
-    cat_tmp=0, data_tmp=0, test_tmp=0, CH_tmp=0, ch_INJ_tmp=0, THRESH_tmp=0, SID_tmp=0, cts=0, counts_tmp=0;
+    ch_INJ, sid, SID, DAC, counts, counts_max=5220, cats = 7,  entrycount=0, temp=0, s_temp=0, i=0, fcount = 0, n=0, f_id=1, status, v_size=0,
+    cat_tmp=0, data_tmp=0, test_tmp=0, CH_tmp=0, ch_INJ_tmp=0, THRESH_tmp=0, SID_tmp=0, cts=0, counts_tmp=0, spikes=0, diffs=0;
     Double_t thresh, THRESH, ChiSq, UL, LL, N_0, N_0_err, mu, mu_err, sigma, sig_err;
     TString filename = "Scurve_tree.root", tree_name = "TB_Scurve";
     TFile *myfile           = new TFile(filename, "READ"); //input TFile
@@ -45,7 +45,7 @@ int TB_Scurve_fit()
     UL = TB_Scurve->GetMaximum("DAC");
     LL = TB_Scurve->GetMinimum("DAC");
     TFile *outfile[30]; 
-    TFile *treefile     = new TFile("TB_Scurve_ThirdPE_pars_2.root", "RECREATE"); 
+    TFile *treefile     = new TFile("TB_Scurve_ThirdPE_pars2.root", "RECREATE"); 
     TTree *TB_pars      = new TTree("TB_Scurve_par","TestBenchDB Scurve NOPE fit parameters");
     
     TB_pars->Branch("FEB_ID",       &FEB_ID,    "FEB_ID/I");
@@ -64,6 +64,9 @@ int TB_Scurve_fit()
     TB_pars->Branch("sig_err",      &sig_err,   "sig_err/D");
     TB_pars->Branch("ChiSq",        &ChiSq,     "ChiSq/D");  
     TB_pars->Branch("status",       &status,    "status/I"); 
+    TB_pars->Branch("spikes",       &spikes,    "spikes/I");
+    TB_pars->Branch("diffs",        &diffs,     "diffs/I");  
+
 
     vector<Double_t> hit_counts, hit_counts_err, sc_DAC, sc_DAC_err; //plot is counts vs. DAC
     TGraphErrors *mygraph;
@@ -94,7 +97,10 @@ int TB_Scurve_fit()
                     
                 for(int m=0; m<v_size; ++m) 
                 {
-                    hit_counts[m] = hit_counts[m]/counts_max;    //normallize counts to unity
+                    //hit_counts[m] = hit_counts[m]/counts_max;    //normallize counts to unity 
+                    hit_counts_err.push_back ( sqrt ( ( (hit_counts[m]+1)*(hit_counts[m]+2))/((counts_max+2)*(counts_max+3) ) - ( pow(hit_counts[m]+1 , 2)/pow(counts_max+2 , 2) ) ) );
+                    //hit_counts_err.push_back( sqrt( hit_counts[m] * (1 - hit_counts[m])/counts_max ) );
+                    hit_counts[m] = hit_counts[m]/counts_max;           // now normalizing to the highest global TRT
                 }
 
                 struct graph_data gdata = {sc_DAC, sc_DAC_err, hit_counts, hit_counts_err};         //the graph
@@ -117,7 +123,7 @@ int TB_Scurve_fit()
                 Q_fit->SetNpx(30000);
                 for(int p=0; p<10; ++p)
                 {
-                    Q_fit->FixParameter(0, 1);
+                    Q_fit->FixParameter(0, 1); //commented this line after normalizing to highest global TRT
                     mygraph->Fit("Q_fit","RqE","",LL,UL);
 
                     for(int j=0; j<3; ++j)
@@ -149,12 +155,23 @@ int TB_Scurve_fit()
                 {
                     FEB_ID = FEB_id;    cat_ID = cat_id;    data_UID = data_uid;    test_ID = test_id;  CH = ch;    SID = sid;    THRESH = thresh;    ch_INJ = ch_inj;   cts=1;
                 }  
+            if(ch==0) spikes=0;
             s_temp=sid; entrycount=1;
-            hit_counts.push_back(counts); //y 
-            hit_counts_err.push_back(0); //y_err 
-            sc_DAC.push_back(DAC); //x in DAC
-            sc_DAC_err.push_back(0); //x_err
-            if(counts>counts_max) counts_max = counts;  
+            if(counts<=counts_max)
+            {
+                hit_counts.push_back(counts); //y 
+                //cout<<counts<< "  "<<counts_tmp<<endl;
+                if((DAC<452) && (DAC>448) && (counts>counts_tmp)) 
+                {
+                    spikes=DAC; diffs = counts-counts_tmp;
+                    cout<<"Spike found at FEB no. "<<FEB_id<<", channel no. "<<ch<<" at "<<DAC<<" DAC"<< endl;
+                }
+                counts_tmp = counts;
+                //hit_counts_err.push_back(0); //y_err 
+                sc_DAC.push_back(DAC); //x in DAC
+                sc_DAC_err.push_back(0); //x_err
+            }
+            //if(counts>counts_max) counts_max = counts;  
         }
 
         if(FEB_count==100)
@@ -168,7 +185,7 @@ int TB_Scurve_fit()
         }
         if(f_id==1) //f_id is the TFile creation index. f_id =1 ---> call to Create a new TFile
         {
-            TString file_tag    = TString("TB_Scurve_ThirdPE") + TString(Form("%d",FEB_id)) + TString(".root");
+            TString file_tag    = TString("TB_Scurve_ThirdPE_") + TString(Form("%d",FEB_id)) + TString(".root");
             outfile[n]          = new TFile(file_tag, "RECREATE"); //n is the index of TFile count.
             f_id = 0;
             cout<<"New TFile created. (n = "<<n<<")"<<endl;
