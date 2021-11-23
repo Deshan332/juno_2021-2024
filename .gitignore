@@ -1,3 +1,5 @@
+*.h
+CB_data_analyzer.cpp
 *.com
 *.class
 *.dll
