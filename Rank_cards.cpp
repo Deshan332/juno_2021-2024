@@ -90,7 +90,6 @@ int Rank_cards()
         Qinj_card_pars->GetEntry(i);
         ThPE_Tcard->cd();
         ThPE_card_pars->GetEntry(i);
-        //cout<<FEB_idc<< "  "<< a1_mean << "  "<< a2_mean <<endl;
 
         for(int j=0; j<64; ++j)
         {
