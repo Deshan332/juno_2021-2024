@@ -19,7 +19,7 @@ int Merge2trees()
     TTree *tree1    = (TTree*)infile1->Get("TB_Scurve_par");
     list->Add(tree1);
     
-    TFile *infile2  = new TFile("TB_Scurve_ThirdPE_pars_2.root", "READ");  
+    TFile *infile2  = new TFile("TB_Scurve_ThirdPE_pars2.root", "READ");  
     TTree *tree2    = (TTree*)infile2->Get("TB_Scurve_par");
     list->Add(tree2);
 
