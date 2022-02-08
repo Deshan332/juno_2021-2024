@@ -24,11 +24,11 @@ using namespace std;
 int TB_Scurve_fit()
 {
     TCanvas* c1         = new TCanvas("c1");
-    Int_t p=0, FEB_id=600, FEB_ID, FEB_tmp = 0, cat_id, test_id, test_ID, cat_ID, data_uid, data_UID, ch, CH, ch_tmp=0, ch_inj, FEB_count=0, 
-    ch_INJ, sid, SID, DAC, counts, counts_max=5220, cats = 7,  entrycount=0, temp=0, s_temp=0, i=0, fcount = 0, n=0, f_id=1, status, v_size=0,
-    cat_tmp=0, data_tmp=0, test_tmp=0, CH_tmp=0, ch_INJ_tmp=0, THRESH_tmp=0, SID_tmp=0, cts=0, counts_tmp=0, spikes=0, diffs=0;
+    Int_t p=0, FEB_id=601, FEB_ID, FEB_tmp = 0, cat_id, test_id, test_ID, cat_ID, data_uid, data_UID, ch, CH, ch_tmp=0, ch_inj, FEB_count=0, 
+    ch_INJ, sid, SID, DAC, counts, counts_max=0, cats = 7,  entrycount=0, temp=0, s_temp=0, i=0, fcount = 0, n=0, f_id=1, status, v_size=0,
+    cat_tmp=0, data_tmp=0, test_tmp=0, CH_tmp=0, ch_INJ_tmp=0, THRESH_tmp=0, SID_tmp=0, cts=0, counts_tmp=0, spikes=0, diffs=0, date, time;
     Double_t thresh, THRESH, ChiSq, UL, LL, N_0, N_0_err, mu, mu_err, sigma, sig_err;
-    TString filename = "Scurve_tree.root", tree_name = "TB_Scurve";
+    TString filename = "Scurve_tree_datetime.root", tree_name = "TB_Scurve";
     TFile *myfile           = new TFile(filename, "READ"); //input TFile
     TTree *TB_Scurve        = (TTree*)myfile->Get(tree_name);
     TB_Scurve->SetBranchAddress("FEB_id",       &FEB_id);
@@ -41,12 +41,14 @@ int TB_Scurve_fit()
     TB_Scurve->SetBranchAddress("sid",          &sid);
     TB_Scurve->SetBranchAddress("DAC",          &DAC); 
     TB_Scurve->SetBranchAddress("counts",       &counts);
+    TB_Scurve->SetBranchAddress("date",         &date); 
+    TB_Scurve->SetBranchAddress("time",         &time);
     
     UL = TB_Scurve->GetMaximum("DAC");
     LL = TB_Scurve->GetMinimum("DAC");
     TFile *outfile[30]; 
-    TFile *treefile     = new TFile("TB_Scurve_ThirdPE_pars2.root", "RECREATE"); 
-    TTree *TB_pars      = new TTree("TB_Scurve_par","TestBenchDB Scurve NOPE fit parameters");
+    TFile *treefile     = new TFile("TB_Scurve_ThirdPE_pars_datetime_2.root", "RECREATE"); 
+    TTree *TB_pars      = new TTree("TB_Scurve_par_datetime","TestBenchDB Scurve NOPE fit parameters");
     
     TB_pars->Branch("FEB_ID",       &FEB_ID,    "FEB_ID/I");
     TB_pars->Branch("cat_ID",       &cat_ID,    "cat_ID/I");
@@ -80,6 +82,9 @@ int TB_Scurve_fit()
         TB_Scurve->GetEntry(i);
         if((cat_id==1)&&(ch_inj>-1)&&(FEB_id>600))
         {
+            if((date<20200518)&&(time<151500))  counts_max = 5000;
+            else if(date<20200525)              counts_max = 5130;
+            else                                counts_max = 5170;
             FEB_tmp = FEB_ID;   cat_tmp = cat_ID;   data_tmp = data_UID;    test_tmp = test_ID; CH_tmp = CH;    SID_tmp = SID;  THRESH_tmp = THRESH;    ch_INJ_tmp = ch_INJ;  //this set holds the data from previous read                           
             if(p==0){s_temp=sid; FEB_tmp = FEB_id; p=10;}
             if(FEB_id!=temp)    
