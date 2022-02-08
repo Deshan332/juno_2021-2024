@@ -16,7 +16,7 @@
 using namespace std;
 int TSaver_Scurve()
 {
-    TString filename = "Scurve_data_25_01_2022.txt";
+    TString filename = "Scurve_data_26_11_2021.txt";
     ifstream read;
     read.open(filename);
     if (!read)

@@ -25,7 +25,7 @@ int Scurve_cards()
 {
     Int_t FEB_idc, FEB_ID=0, cat_idc, cat_ID, test_ID, test_idc, data_uidc, data_UID, CH, status, SID, sidc;
     Double_t mu, mu_err, mu_mean, mu_sig, sigma, sig_err, sig_mean, sig_sig, THRESH, THRESH_mean, ChiSq, ChiSq_mean, ChiSq_sig;
-    TString filename = "/home/pdeshans/Documents/PhD_files/from_M2_cpy/Scurve_ThirdPE_sum.root", tree_name = "TB_Scurve_par";
+    TString filename = "/home/pdeshans/Documents/PhD_files/from_M2_cpy/ThirdPE_fitdata/spike_data_23_11_2021/Scurve_ThirdPE_sum.root", tree_name = "TB_Scurve_par";
     TFile *myfile       = new TFile(filename); //input TFile
     TTree *TB_pars      = (TTree*)myfile->Get(tree_name); //input TTree
 

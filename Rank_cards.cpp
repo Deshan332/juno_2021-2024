@@ -27,8 +27,8 @@ int Rank_cards()
     
     TString Qinj_file = "/home/pdeshans/Documents/PhD_files/from_M2_cpy/Qinj_fitdata/After_constrain/test_b2.root",     Qinj_file_tree = "TB_lin_par";
     TString Qinj_card = "/home/pdeshans/Documents/PhD_files/from_M2_cpy/Qinj_fitdata/After_constrain/TB_cards_b2.root", Qinj_card_tree = "TB_cards";
-    TString ThPE_file = "/home/pdeshans/Documents/PhD_files/from_M2_cpy/ThirdPE_fitdata/Scurve_ThirdPE_sum.root",       ThPE_file_tree = "TB_Scurve_par";
-    TString ThPE_card = "/home/pdeshans/Documents/PhD_files/from_M2_cpy/ThirdPE_fitdata/TB_cards_ThirdPE.root",         ThPE_card_tree = "TB_cards";
+    TString ThPE_file = "/home/pdeshans/Documents/PhD_files/from_M2_cpy/ThirdPE_fitdata/corrected_for_variable_plateau_27_01_2022/Scurve_ThirdPE_sum.root",       ThPE_file_tree = "TB_Scurve_par_datetime";
+    TString ThPE_card = "/home/pdeshans/Documents/PhD_files/from_M2_cpy/ThirdPE_fitdata/corrected_for_variable_plateau_27_01_2022/TB_cards_ThirdPE.root",         ThPE_card_tree = "TB_cards";
     
     TFile *Qinj_Tfile       = new TFile(Qinj_file); //input TFile with Qinj data by channels
     TTree *Qinj_pars        = (TTree*)Qinj_Tfile->Get(Qinj_file_tree);
