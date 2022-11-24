@@ -136,7 +136,7 @@ int TB_Scurve_fit()
                         par[j] = Q_fit->GetParameter(j);
                         Q_fit->SetParameter(j,par[j]);
                     }
-                    if( (gMinuit->fCstatu.Contains("CONVERGED"))  && (Q_fit->GetChisquare()/Q_fit->GetNDF() < 5) )  {status =1;    Q_fit->SetLineColor(2);   break;}
+                    if( (gMinuit->fCstatu.Contains("CONVERGED")) || (gMinuit->fCstatu.Contains("SUCCESSFUL"))  )  {status =1;    Q_fit->SetLineColor(2);   break;}
                     else    {status =0;    Q_fit->SetLineColor(1);}
                 }
                 gStyle->SetOptStat(111);
